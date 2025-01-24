@@ -17,17 +17,15 @@
                         <th data-field="viewRecord">View Record</th>
                     <tr>
                 </thead>
-                    {% for coffeeShop, accounts in availableAccounts.items %}
-                        {% for account in accounts %}
-                            <tr>
-                                <td>{{account.coffeeShop.name}}</td>
-                                <td>{{account.accountCode}}</td>
-                                <td>{{account.currentPoints}}</td>
-                                <td>{{account.availableRewards}}</td>
-                                <td><a href="/rewards/points/{{account.accountCode}}">Link</a></td>
-                                <td><a href="/rewards/timeline/{{account.accountCode}}">Link</a></td>
-                            </tr>
-                        {% endfor %}
+                    {% for account in availableAccounts %}
+                        <tr>
+                            <td>{{account.coffeeShop.name}}</td>
+                            <td>{{account.accountCode}}</td>
+                            <td>{{account.currentPoints}}</td>
+                            <td>{{account.availableRewards}}</td>
+                            <td><a href="/rewards/points/{{account.accountCode}}">Link</a></td>
+                            <td><a href="/rewards/timeline/{{account.accountCode}}">Link</a></td>
+                        </tr>
                     {% endfor %}
             </table>
         </div>

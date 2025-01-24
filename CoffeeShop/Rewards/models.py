@@ -1,8 +1,28 @@
 from django.db import models
 from datetime import datetime
 from django.utils import timezone
+from django.contrib.auth.models import User
+
+# Create your models here.
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f"{self.user}"    
+
+class CoffeeShop(models.Model):
+    name = models.CharField(max_length=30, help_text="Name of the coffee shop")
+    users = models.ManyToManyField(UserProfile)
+    address = models.CharField(max_length=30, help_text="Name of the coffee shop")
+    postcode = models.CharField(max_length=30, help_text="Name of the coffee shop")
+
+    def __str__(self):
+        return f"{self.name} - {self.postcode}"
 
 class Account(models.Model):
+    coffeeShop = models.ForeignKey(CoffeeShop, on_delete=models.CASCADE)
     accountCode = models.CharField(verbose_name="Account Code", max_length=30, unique=True, default="")
     dateTimeCreated = models.DateTimeField(verbose_name="Date / Time Created", default=timezone.now)
     currentPoints = models.BigIntegerField(verbose_name="Current Points", default=0)
