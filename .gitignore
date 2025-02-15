@@ -1,4 +1,5 @@
 CoffeeShop/Rewards/migrations/*
+CoffeeShop/Account/migrations/*
 *.pyc
 *.sqlite3
 uv.lock

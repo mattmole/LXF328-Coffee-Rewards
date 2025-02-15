@@ -7,20 +7,19 @@ def get_range(value):
     return range(value)
 
 
-def hasAccountPermission(coffeeShop = None, account = None, user=None):
-    if user!= None and user.is_superuser:
+def hasCoffeeShopPermission(coffeeShop = None, account = None, userProfile=None):
+    if userProfile != None and userProfile.user.is_superuser:
         return(True)
     
-    userProfile = UserProfile.objects.get(user=user)
-    accessibleCoffeeShops = CoffeeShop.objects.filter(users = userProfile)
+    accessibleCoffeeShops = CoffeeShop.objects.filter(users__user = userProfile)
     
     status = None
-    if coffeeShop != None and account == None and user != None:
+    if coffeeShop != None and account == None and userProfile!= None:
         if coffeeShop in accessibleCoffeeShops:
             status = True
         else:
             status = False
-    elif account != None and coffeeShop == None and user != None:
+    elif account != None and coffeeShop == None and userProfile != None:
 
         accountCoffeeShop = account.coffeeShop
 
@@ -31,5 +30,15 @@ def hasAccountPermission(coffeeShop = None, account = None, user=None):
     else:
         print("Please only specify one of coffeeShop or account")
         print("The user argument is mandatory")
-    print(status)
     return status
+
+def hasSuperAdmin(user):
+    if user != None and user.is_superuser:
+        return(True)
+    else:
+        return(False)
+
+def userPermissions(userProfile=None, coffeeShop=None):
+    superAdmin = False
+    if userProfile != None and userProfile.user.is_superuser:
+        return(True)

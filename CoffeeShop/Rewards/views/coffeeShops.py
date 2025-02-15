@@ -21,7 +21,7 @@ def listCoffeeShops(request):
             availableCoffeeShops = CoffeeShop.objects.all().annotate(accountsCount=Count('account'),currentPoints=Sum('account__currentPoints'),availableRewards=Sum('account__availableRewards'))
         else:
             # Find the Coffee Shops the user can access
-            availableCoffeeShops = CoffeeShop.objects.filter(users = loggedInUserProfile).annotate(accountsCount=Count('account'),currentPoints=Sum('account__currentPoints'),availableRewards=Sum('account__availableRewards'))
+            availableCoffeeShops = CoffeeShop.objects.filter(users__user = loggedInUserProfile).annotate(accountsCount=Count('account'),currentPoints=Sum('account__currentPoints'),availableRewards=Sum('account__availableRewards'))
 
 
     return render(request, "coffeeShops.html", {"availableCoffeeShops": availableCoffeeShops})

@@ -2,7 +2,7 @@
     <body>
 
         <div class="container-fluid p-5 bg-primary text-white text-center">
-            <h1>Coffe Shop Listing</h1>
+            <h1>Coffee Shop Listing</h1>
         </div>
 
         <div class="container mt-5">
@@ -24,7 +24,7 @@
                             <td>{{coffeeShop.accountsCount}}</td>
                             <td>{{coffeeShop.currentPoints}}</td>
                             <td>{{coffeeShop.availableRewards}}</td>
-                            <td><a href="/rewards/coffeeShop/{{coffeeShop.id}}">Link</a></td>
+                            <td><a href="{% url 'listCoffeeShopAccounts' coffeeShop.id %}">Link</a></td>
                         </tr>
                     {% endfor %}
             </table>

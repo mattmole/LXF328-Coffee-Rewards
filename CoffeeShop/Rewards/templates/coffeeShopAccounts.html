@@ -1,10 +1,37 @@
 {% include "header.html" %}
     <body>
-
+    <!-- Modal -->
+    <script>
+        function updateButtonLink(accountCode){
+            const button = document.getElementById("deleteAccountLink")
+            link = "/rewards/deleteAccount/"+accountCode
+            button.href=link;
+            const modalDiv = document.getElementById("modalAccountCode")
+            modalDiv.innerHTML = "<b>"+accountCode+"</b>";
+        }
+    </script>
+    <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="staticBackdropLabel">Delete Account Confirmation</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+            Are you sure you want to delete this account and it's corresponding history?
+            </div>
+            <div class="modal-body" id="modalAccountCode">
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <a href="#" class="btn btn-danger" tabindex="-1" role="button" aria-disabled="true" id="deleteAccountLink">Delete Account</a>
+            </div>
+        </div>
+        </div>
+    </div>
         <div class="container-fluid p-5 bg-primary text-white text-center">
             <h1>Account Listing</h1>
         </div>
-
         <div class="container mt-5">
             <table class="table table-striped table-hover" data-toggle="table" data-search="true" data-sortable="true" data-pagination="true" data-page-list="[10, 25, 50, 100, all]" >
                 <thead>
@@ -15,6 +42,9 @@
                         <th data-sortable=true>Available Rewards</th>
                         <th data-field="changeBalance">Change Balance</th>
                         <th data-field="viewRecord">View Record</th>
+                        {% if userPermission != None and userPermission.permissions == "admin" or loggedInUser.is_superuser  %}
+                            <th>Delete Account</th>
+                        {% endif %}
                     <tr>
                 </thead>
                     {% for account in availableAccounts %}
@@ -23,47 +53,54 @@
                             <td>{{account.accountCode}}</td>
                             <td>{{account.currentPoints}}</td>
                             <td>{{account.availableRewards}}</td>
-                            <td><a href="/rewards/points/{{account.accountCode}}">Link</a></td>
-                            <td><a href="/rewards/timeline/{{account.accountCode}}">Link</a></td>
+                            <td><a href="{% url 'pointsEntry' account.accountCode %}" class="btn btn-primary" role="button" aria-disabled="true">Update Balance</a></td>
+                            <td><a href="{% url 'timelineView' account.accountCode %}" class="btn btn-primary" role="button" aria-disabled="true">View History</a></td>
+                            {% if userPermission != None and userPermission.permissions == "admin" or loggedInUser.is_superuser  %}
+                                <td>
+                                    <a href="#" class="btn btn-danger" role="button" aria-disabled="true" data-bs-toggle="modal" data-bs-target="#staticBackdrop" onClick="updateButtonLink('{{ account.accountCode }}');">Delete Account</a>
+                                </td>
+                            {%endif %}
                         </tr>
                     {% endfor %}
             </table>
         </div>
+        {% if userPermission != None and userPermission.permissions != "read" or loggedInUser.is_superuser  %}
 
-        <div class="container-fluid p-5 bg-primary text-white text-center">
-            <h1>Create New Account</h1>
-        </div>
+            <div class="container-fluid p-5 bg-primary text-white text-center">
+                <h1>Create New Account</h1>
+            </div>
 
-        <div class="container mt-5">
-            <form action="/rewards/createAccount" method="post">
-                {% csrf_token %}
-                <p>
-                    <label for="newAccountCode" class="form-label">New Account Code</label>
-                    <input class="form-control" type="text" name="newAccountCode" id="newAccountCode" readonly="true" value="{{newAccountCode}}">
-                </p>
-                <p>
-                    <label for="initialPoints" class="form-label">Initial Points</label>
-                    <select class="form-select form-select-lg mb-3" name="initialPoints" id="initialPoints">
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                    </select>
-                </p>
-                <p>
-                    Initial Rewards: 
-                    <select class="form-select form-select-lg mb-3" name="initialRewards" id="initialRewards">
-                        <option value="0">0</option>
-                        <option value="1">1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                    </select>
-                </p>
-                <p>
-                    <button class="btn btn-primary" type="submit">Submit form</button>
-                </p>
-            </form>
-        </div>
+            <div class="container mt-5">
+                <form action="/rewards/createAccount/{{coffeeShopId}}" method="post">
+                    {% csrf_token %}
+                    <p>
+                        <label for="newAccountCode" class="form-label">New Account Code</label>
+                        <input class="form-control" type="text" name="newAccountCode" id="newAccountCode" readonly="true" value="{{newAccountCode}}">
+                    </p>
+                    <p>
+                        <label for="initialPoints" class="form-label">Initial Points</label>
+                        <select class="form-select form-select-lg mb-3" name="initialPoints" id="initialPoints">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                        </select>
+                    </p>
+                    <p>
+                        Initial Rewards: 
+                        <select class="form-select form-select-lg mb-3" name="initialRewards" id="initialRewards">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                        </select>
+                    </p>
+                    <p>
+                        <button class="btn btn-primary" type="submit">Submit form</button>
+                    </p>
+                </form>
+            </div>
+        {% endif %}
         <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.0/dist/bootstrap-table.min.js"></script>  

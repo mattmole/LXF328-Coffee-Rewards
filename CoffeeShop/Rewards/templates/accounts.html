@@ -24,8 +24,8 @@
                                 <td>{{account.accountCode}}</td>
                                 <td>{{account.currentPoints}}</td>
                                 <td>{{account.availableRewards}}</td>
-                                <td><a href="/rewards/points/{{account.accountCode}}">Link</a></td>
-                                <td><a href="/rewards/timeline/{{account.accountCode}}">Link</a></td>
+                                <td><a href="{% url 'pointsEntry' account.accountCode %}">Link</a></td>
+                                <td><a href="{% url 'timelineView' ccount.accountCode %}">Link</a></td>
                             </tr>
                         {% endfor %}
                     {% endfor %}
@@ -66,6 +66,7 @@
                 </p>
             </form>
         </div>
+
         <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.0/dist/bootstrap-table.min.js"></script>  

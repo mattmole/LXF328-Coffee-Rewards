@@ -1,4 +1,7 @@
 {% include "header.html" %}
+    {% if redirectUrl != "" %}
+        <meta http-equiv="refresh" content="5; url={{redirectUrl}}">
+    {% endif %}
     <body>
         <div class="container-fluid p-5 bg-primary text-white text-center">
             <h1>Success</h1>
