@@ -1,0 +1,18 @@
+{% extends "../base.html" %}
+
+{% block mainBody %}
+
+{% if user.is_authenticated %}
+    <meta http-equiv="REFRESH" content="0;url=/rewards/coffeeShops">
+{% else %}
+
+    <h1>Log In</h1>
+    <form method="post">
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit">Log In</button>
+    </form>
+
+{% endif %}
+
+{% endblock %}

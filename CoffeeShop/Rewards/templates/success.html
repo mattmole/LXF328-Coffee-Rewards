@@ -1,31 +1,37 @@
-{% include "header.html" %}
+{% extends "base.html" %}
+
+{% block header1 %}
+    Success
+{% endblock %}
+
+{% block mainBody %}
+
     {% if redirectUrl != "" %}
         <meta http-equiv="refresh" content="5; url={{redirectUrl}}">
     {% endif %}
-    <body>
-        <div class="container-fluid p-5 bg-primary text-white text-center">
-            <h1>Success</h1>
-        </div>        
-        
-        <div class="container mt-5">
+    
+    <div class="container-fluid p-5 bg-primary text-white text-center">
+        <h1>Success</h1>
+    </div>        
+    
+    <div class="container mt-5">
 
-            <p>{{message}}</p>
-            {% if pointsAdded > 0 %}
-                <p>
-                    Points added: 
-                    {% for a in pointsAdded|get_range %}
-                        &#x2615;
-                {% endfor %}
-                </p>
-            {% endif %}
-            {% if rewardsUsed > 0 %}
+        <p>{{message}}</p>
+        {% if pointsAdded > 0 %}
             <p>
-                Rewards used:
-                {% for a in rewardsUsed|get_range %}
+                Points added: 
+                {% for a in pointsAdded|get_range %}
                     &#x2615;
-                {% endfor %}
+            {% endfor %}
             </p>
-            {% endif %}
-        </div>
-    </body>
-{% include "footer.html" %}
+        {% endif %}
+        {% if rewardsUsed > 0 %}
+        <p>
+            Rewards used:
+            {% for a in rewardsUsed|get_range %}
+                &#x2615;
+            {% endfor %}
+        </p>
+        {% endif %}
+    </div>
+{% endblock %}

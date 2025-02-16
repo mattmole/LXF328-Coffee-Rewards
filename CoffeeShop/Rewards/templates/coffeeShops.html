@@ -1,38 +1,35 @@
-{% include "header.html" %}
-    <body>
+{% extends "base.html" %}
+    {% block header1 %}
+    Coffee Shop Listing
+    {% endblock %}
 
-        <div class="container-fluid p-5 bg-primary text-white text-center">
-            <h1>Coffee Shop Listing</h1>
-        </div>
-
-        <div class="container mt-5">
-            <table class="table table-striped table-hover" data-toggle="table" data-search="true" data-sortable="true" data-pagination="true" data-page-list="[10, 25, 50, 100, all]" >
-                <thead>
+    {% block mainBody %}
+    <div class="container mt-5">
+        <table class="table table-striped table-hover" data-toggle="table" data-search="true" data-sortable="true" data-pagination="true" data-page-list="[10, 25, 50, 100, all]" >
+            <thead>
+                <tr>
+                    <th data-sortable=true>Coffee Shop Name</th>
+                    <th data-sortable=true>Post Code</th>                        
+                    <th data-sortable=true>Number of Accounts</th>
+                    <th data-sortable=true>Number of Current Points</th>
+                    <th>Number of Available Rewards</th>
+                    <th>View Accounts</th>
+                <tr>
+            </thead>
+                {% for coffeeShop in availableCoffeeShops %}
                     <tr>
-                        <th data-sortable=true>Coffee Shop Name</th>
-                        <th data-sortable=true>Post Code</th>                        
-                        <th data-sortable=true>Number of Accounts</th>
-                        <th data-sortable=true>Number of Current Points</th>
-                        <th>Number of Available Rewards</th>
-                        <th>View Accounts</th>
-                    <tr>
-                </thead>
-                    {% for coffeeShop in availableCoffeeShops %}
-                        <tr>
-                            <td>{{coffeeShop.name}}</td>
-                            <td>{{coffeeShop.postcode}}</td>
-                            <td>{{coffeeShop.accountsCount}}</td>
-                            <td>{{coffeeShop.currentPoints}}</td>
-                            <td>{{coffeeShop.availableRewards}}</td>
-                            <td><a href="{% url 'listCoffeeShopAccounts' coffeeShop.id %}">Link</a></td>
-                        </tr>
-                    {% endfor %}
-            </table>
-        </div>
+                        <td>{{coffeeShop.name}}</td>
+                        <td>{{coffeeShop.postcode}}</td>
+                        <td>{{coffeeShop.accountsCount}}</td>
+                        <td>{{coffeeShop.currentPoints}}</td>
+                        <td>{{coffeeShop.availableRewards}}</td>
+                        <td><a href="{% url 'listCoffeeShopAccounts' coffeeShop.id %}">Link</a></td>
+                    </tr>
+                {% endfor %}
+        </table>
+    </div>
 
-        <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.0/dist/bootstrap-table.min.js"></script>  
-
-    </body>
-{% include "footer.html" %}
+    <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.0/dist/bootstrap-table.min.js"></script>  
+    {% endblock %}

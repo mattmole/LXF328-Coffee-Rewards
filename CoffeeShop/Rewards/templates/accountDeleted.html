@@ -1,4 +1,11 @@
-{% include "header.html" %}
+{% extends "base.html" %}
+
+{% block header1 %}
+    Account Deleted
+{% endblock %}
+
+{% block mainBody %}
+
     {% if redirectUrl != "" %}
         <meta http-equiv="refresh" content="5; url={{redirectUrl}}">
     {% endif %}
@@ -10,4 +17,5 @@
             <p>{{message}}</p>
         </div>
     </body>
-{% include "footer.html" %}
+
+{% endblock %}

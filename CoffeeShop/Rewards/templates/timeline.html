@@ -1,77 +1,82 @@
-{% include "header.html" %}
-    <body>
-        <div class="container-fluid p-5 bg-primary text-white text-center">
-            <h1>Account Timeline</h1>
-            <h2>Current Status</h2>
-        </div>
+{% extends "base.html" %}
 
-        <div class="container mt-5">
+{% block header1 %}
+    Account Timeline
+{% endblock %}
 
-            <p>Account Code: {{account.accountCode}}</p>
-            <p>
-                Available Rewards: 
-                {% if account.availableRewards == 0 %}
-                    0
-                {% endif %}
-                {% if account.availableRewards > 0 %}
-                {% for a in account.availableRewards|get_range %}
-                    &#x2615;
-                {% endfor %}        
-                {% endif %}
-            </p>
-            <p>
-                Current Points:
-                {% if account.currentPoints == 0 %}
-                    0
-                {% endif %}
-                {% if account.currentPoints > 0 %}
+{% block mainBody %}
 
-                {% for a in account.currentPoints|get_range %}
-                    &#x2615;
-                {% endfor %}
-                {% endif %}
-            </p>
-            <p>
-                Past Rewards Used:
-                {% if account.rewardsUsed == 0 %}
-                    0
-                {% endif %}
-                {% if account.rewardsUsed > 0 %}
+    <div class="container-fluid p-5 bg-primary text-white text-center">
+        <h1>Account Timeline</h1>
+        <h2>Current Status</h2>
+    </div>
 
-                {% for a in account.rewardsUsed|get_range %}
-                    &#x2615;
-                {% endfor %}
-                {% endif %}
-            </p>
-            <p>
-                Historical Points Collected: {{account.totalPoints}}
-            </p>
-        </div>
+    <div class="container mt-5">
 
-        <div class="container-fluid p-5 bg-primary text-white text-center">
-            <h2>Historical Record</h2>
-        </div>
+        <p>Account Code: {{account.accountCode}}</p>
+        <p>
+            Available Rewards: 
+            {% if account.availableRewards == 0 %}
+                0
+            {% endif %}
+            {% if account.availableRewards > 0 %}
+            {% for a in account.availableRewards|get_range %}
+                &#x2615;
+            {% endfor %}        
+            {% endif %}
+        </p>
+        <p>
+            Current Points:
+            {% if account.currentPoints == 0 %}
+                0
+            {% endif %}
+            {% if account.currentPoints > 0 %}
 
-        <div class="container mt-5">
-            <table class="table table-striped table-hover" data-toggle="table" data-search="true" data-sortable="true" data-pagination="true" data-page-list="[10, 25, 50, 100, all]" >
-                <thead>
-                    <tr>
-                        <th data-sortable="true">Timestamp</th>
-                        <th data-sortable="true">Operation</th>
-                        <th data-sortable="true">Change</th>
-                    </tr>
-                </thead>
-                {% for accountOperation in accountOperations %}
-                    <tr>
-                        <td>{{accountOperation.dateTimeOfOperation}}</td>
-                        <td>{{accountOperation.operation}}</td>
-                        <td>{{accountOperation.pointsChange}}</td>
-                    </tr>
-                {% endfor %}
-            </table>
-        </div>
-        <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.0/dist/bootstrap-table.min.js"></script>  
-    </body>
-</html>
+            {% for a in account.currentPoints|get_range %}
+                &#x2615;
+            {% endfor %}
+            {% endif %}
+        </p>
+        <p>
+            Past Rewards Used:
+            {% if account.rewardsUsed == 0 %}
+                0
+            {% endif %}
+            {% if account.rewardsUsed > 0 %}
+
+            {% for a in account.rewardsUsed|get_range %}
+                &#x2615;
+            {% endfor %}
+            {% endif %}
+        </p>
+        <p>
+            Historical Points Collected: {{account.totalPoints}}
+        </p>
+    </div>
+
+    <div class="container-fluid p-5 bg-primary text-white text-center">
+        <h2>Historical Record</h2>
+    </div>
+
+    <div class="container mt-5">
+        <table class="table table-striped table-hover" data-toggle="table" data-search="true" data-sortable="true" data-pagination="true" data-page-list="[10, 25, 50, 100, all]" >
+            <thead>
+                <tr>
+                    <th data-sortable="true">Timestamp</th>
+                    <th data-sortable="true">Operation</th>
+                    <th data-sortable="true">Change</th>
+                </tr>
+            </thead>
+            {% for accountOperation in accountOperations %}
+                <tr>
+                    <td>{{accountOperation.dateTimeOfOperation}}</td>
+                    <td>{{accountOperation.operation}}</td>
+                    <td>{{accountOperation.pointsChange}}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap-table@1.24.0/dist/bootstrap-table.min.js"></script>  
+{% endblock %}

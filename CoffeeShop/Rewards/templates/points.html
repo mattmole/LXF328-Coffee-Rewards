@@ -1,84 +1,83 @@
-{% include "header.html" %}
-    <body>
+{% extends "base.html" %}
+
+{% block header1 %}
+    Update Points
+{% endblock %}
+
+{% block mainBody %}
+
+    <div class="container mt-5">
+        <p>Account Code: {{account.accountCode}}</p>
+        <p>
+            Available Rewards: 
+            {% if account.availableRewards == 0 %}
+                0
+            {% endif %}
+            {% if account.availableRewards > 0 %}
+            {% for a in account.availableRewards|get_range %}
+                &#x2615;
+            {% endfor %}        
+            {% endif %}
+        </p>
+        <p>
+            Current Points:
+            {% if account.currentPoints == 0 %}
+                0
+            {% endif %}
+            {% if account.currentPoints > 0 %}
+
+            {% for a in account.currentPoints|get_range %}
+                &#x2615;
+            {% endfor %}
+            {% endif %}
+        </p>
+        <p>
+            Past Rewards Used:
+            {% if account.rewardsUsed == 0 %}
+                0
+            {% endif %}
+            {% if account.rewardsUsed > 0 %}
+
+            {% for a in account.rewardsUsed|get_range %}
+                &#x2615;
+            {% endfor %}
+            {% endif %}
+        </p>
+        <p>
+            Historical Points Collected: {{account.totalPoints}}
+        </p>
+
+    </div>
+    {% if userPermission != None and userPermission.permissions != "read" or loggedInUser.is_superuser  %}
 
         <div class="container-fluid p-5 bg-primary text-white text-center">
-            <h1>Account Update</h1>
-            <h2>Current Status</h2>
+            <h2>Points Balance</h2>
         </div>
 
         <div class="container mt-5">
-            <p>Account Code: {{account.accountCode}}</p>
-            <p>
-                Available Rewards: 
-                {% if account.availableRewards == 0 %}
-                    0
-                {% endif %}
-                {% if account.availableRewards > 0 %}
-                {% for a in account.availableRewards|get_range %}
-                    &#x2615;
-                {% endfor %}        
-                {% endif %}
-            </p>
-            <p>
-                Current Points:
-                {% if account.currentPoints == 0 %}
-                    0
-                {% endif %}
-                {% if account.currentPoints > 0 %}
-
-                {% for a in account.currentPoints|get_range %}
-                    &#x2615;
-                {% endfor %}
-                {% endif %}
-            </p>
-            <p>
-                Past Rewards Used:
-                {% if account.rewardsUsed == 0 %}
-                    0
-                {% endif %}
-                {% if account.rewardsUsed > 0 %}
-
-                {% for a in account.rewardsUsed|get_range %}
-                    &#x2615;
-                {% endfor %}
-                {% endif %}
-            </p>
-            <p>
-                Historical Points Collected: {{account.totalPoints}}
-            </p>
-
+            <form action="{% url 'pointsBalanceUpdate' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" id="accountId" name="accountId" value="{{account.accountCode}}"> 
+                    <label for="addPoints" class="form-label">Add Points</label>
+                    <select class="form-select form-select-lg mb-3" name="addPoints" id="addPoints">
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                    </select>
+                <p>
+                    <label for="useRewards" class="form-label">Use Rewards</label>
+                    <select class="form-select form-select-lg mb-3" name="useRewards" id="useRewards">
+                        <option value="{{i|add:'0'}}">{{i|add:'0'}}</option>
+                        {% for i in account.availableRewards|get_range %}
+                        <option value="{{i|add:'1'}}">{{i|add:'1'}}</option>
+                        {% endfor %}
+                    </select>
+                </p>
+                <p>
+                    <button class="btn btn-primary" type="submit">Submit form</button>
+                </p>
+            </form>
         </div>
-        {% if userPermission != None and userPermission.permissions != "read" or loggedInUser.is_superuser  %}
-
-            <div class="container-fluid p-5 bg-primary text-white text-center">
-                <h2>Points Balance</h2>
-            </div>
-
-            <div class="container mt-5">
-                <form action="{% url 'pointsBalanceUpdate' %}" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" id="accountId" name="accountId" value="{{account.accountCode}}"> 
-                        <label for="addPoints" class="form-label">Add Points</label>
-                        <select class="form-select form-select-lg mb-3" name="addPoints" id="addPoints">
-                            <option value="0">0</option>
-                            <option value="1">1</option>
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                        </select>
-                    <p>
-                        <label for="useRewards" class="form-label">Use Rewards</label>
-                        <select class="form-select form-select-lg mb-3" name="useRewards" id="useRewards">
-                            <option value="{{i|add:'0'}}">{{i|add:'0'}}</option>
-                            {% for i in account.availableRewards|get_range %}
-                            <option value="{{i|add:'1'}}">{{i|add:'1'}}</option>
-                            {% endfor %}
-                        </select>
-                    </p>
-                    <p>
-                        <button class="btn btn-primary" type="submit">Submit form</button>
-                    </p>
-                </form>
-            </div>
-        {% endif %}
-    </body>
-</html>
+    {% endif %}
+{% endblock %}
