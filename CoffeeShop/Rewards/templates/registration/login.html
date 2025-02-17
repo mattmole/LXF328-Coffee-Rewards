@@ -1,18 +1,33 @@
 {% extends "../base.html" %}
 
+{% block header1 %}
+Login
+{% endblock %}
+
 {% block mainBody %}
 
-{% if user.is_authenticated %}
-    <meta http-equiv="REFRESH" content="0;url=/rewards/coffeeShops">
-{% else %}
+    {% if user.is_authenticated %}
+        <meta http-equiv="REFRESH" content="0;url=/rewards/coffeeShops">
+    {% else %}
 
-    <h1>Log In</h1>
-    <form method="post">
-    {% csrf_token %}
-    {{ form }}
-    <button type="submit">Log In</button>
-    </form>
+    <div class="container mt-5">
 
-{% endif %}
+
+        <form action="{% url 'login' %}" method="post">
+            <div class="form-floating mb-3">
+                {% csrf_token %}
+            </div>
+            <div class="form-floating mb-3">
+                {{ form.username | addIdAndClass:'usernameInput,form-control' }}
+                <label for="usernameInput">Username</label>
+            </div>
+            <div class="form-floating mb-3">
+                {{ form.password | addIdAndClass:'passwordInput,form-control'}}
+                <label for="passwordInput">Password</label>
+            </div>
+            <button class="btn btn-primary"  type="submit">Log In</button>
+        </form>
+    </div>
+    {% endif %}
 
 {% endblock %}

@@ -24,6 +24,7 @@ class CoffeeShop(models.Model):
     users = models.ManyToManyField(UserPermission, related_name="userPermissions")
     address = models.CharField(max_length=30, help_text="Name of the coffee shop")
     postcode = models.CharField(max_length=30, help_text="Name of the coffee shop")
+    disabled = models.BooleanField(verbose_name="Account Disabled", default=False)
 
     def __str__(self):
         return f"{self.name} - {self.postcode}"

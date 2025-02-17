@@ -6,6 +6,18 @@ def get_range(value):
     print(value)
     return range(value)
 
+@register.filter(name='addClass')
+def addClass(value, arg):
+    return value.as_widget(attrs={'class': arg})
+
+@register.filter(name='addId')
+def addId(value, arg):
+    return value.as_widget(attrs={'id': arg})
+
+@register.filter(name='addIdAndClass')
+def addIdAndClass(value, args):
+    idArg, classArg = args.split(",")
+    return value.as_widget(attrs={'id': idArg, 'class': classArg})
 
 def hasCoffeeShopPermission(coffeeShop = None, account = None, userProfile=None):
     if userProfile != None and userProfile.user.is_superuser:
