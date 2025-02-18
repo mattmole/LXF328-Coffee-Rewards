@@ -6,47 +6,57 @@
 
 {% block mainBody %}
 
+
     <div class="container mt-5">
-        <p>Account Code: {{account.accountCode}}</p>
-        <p>
-            Available Rewards: 
-            {% if account.availableRewards == 0 %}
-                0
-            {% endif %}
-            {% if account.availableRewards > 0 %}
-            {% for a in account.availableRewards|get_range %}
-                &#x2615;
-            {% endfor %}        
-            {% endif %}
-        </p>
-        <p>
-            Current Points:
-            {% if account.currentPoints == 0 %}
-                0
-            {% endif %}
-            {% if account.currentPoints > 0 %}
+        <div class="container text-center">
+            <div class="row align-items-start">
+              <div class="col">
+                <p>Account Code: {{account.accountCode}}</p>
+                <p>
+                    Available Rewards: 
+                    {% if account.availableRewards == 0 %}
+                        0
+                    {% endif %}
+                    {% if account.availableRewards > 0 %}
+                    {% for a in account.availableRewards|get_range %}
+                        &#x2615;
+                    {% endfor %}        
+                    {% endif %}
+                </p>
+                <p>
+                    Current Points:
+                    {% if account.currentPoints == 0 %}
+                        0
+                    {% endif %}
+                    {% if account.currentPoints > 0 %}
 
-            {% for a in account.currentPoints|get_range %}
-                &#x2615;
-            {% endfor %}
-            {% endif %}
-        </p>
-        <p>
-            Past Rewards Used:
-            {% if account.rewardsUsed == 0 %}
-                0
-            {% endif %}
-            {% if account.rewardsUsed > 0 %}
+                    {% for a in account.currentPoints|get_range %}
+                        &#x2615;
+                    {% endfor %}
+                    {% endif %}
+                </p>
+                <p>
+                    Past Rewards Used:
+                    {% if account.rewardsUsed == 0 %}
+                        0
+                    {% endif %}
+                    {% if account.rewardsUsed > 0 %}
 
-            {% for a in account.rewardsUsed|get_range %}
-                &#x2615;
-            {% endfor %}
-            {% endif %}
-        </p>
-        <p>
-            Historical Points Collected: {{account.totalPoints}}
-        </p>
-
+                    {% for a in account.rewardsUsed|get_range %}
+                        &#x2615;
+                    {% endfor %}
+                    {% endif %}
+                </p>
+            <p>
+                Historical Points Collected: {{account.totalPoints}}
+            </p>              
+        </div>
+              <div class="col">
+                <img src="{{qrCode}}" class="rounded mx-auto d-block img-fluid"/>
+              </div>
+            </div>
+          </div>
+                
     </div>
     {% if userPermission != None and userPermission.permissions != "read" or loggedInUser.is_superuser  %}
 

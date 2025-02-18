@@ -85,7 +85,13 @@ def listCoffeeShopAccounts(request, coffeeShopId):
 
     newAccountCode = genNewAccountCode()
 
-    return render(request, "coffeeShopAccounts.html", {"coffeeShopId": coffeeShopId, "availableAccounts": availableAccounts, "newAccountCode":newAccountCode, "userPermission": userPermission, "loggedInUser": loggedInUser, "userIsSuperAdmin":userIsSuperAdmin})
+    # Generate QR Codes
+    qrCodeDict = {}
+    for account in availableAccounts:
+        if account.accountCode not in qrCodeDict:
+            qrCodeDict[account.accountCode] = generateQrCode(account.accountCode)
+
+    return render(request, "coffeeShopAccounts.html", {"coffeeShopId": coffeeShopId, "availableAccounts": availableAccounts, "newAccountCode":newAccountCode, "userPermission": userPermission, "loggedInUser": loggedInUser, "userIsSuperAdmin":userIsSuperAdmin, "qrCodes": qrCodeDict})
 
 
 def pointsEntry(request,accountId):
@@ -119,8 +125,11 @@ def pointsEntry(request,accountId):
 
     hasPermission = hasCoffeeShopPermission(account=account, userProfile=UserProfile.objects.get(user = loggedInUser))
 
+    # Generate QR Code
+    qrCode = generateQrCode(account.accountCode)
+
     if hasPermission:
-        return render(request, "points.html", {"account": account, "userPermission": userPermission, "loggedInUser": loggedInUser, "userIsSuperAdmin":userIsSuperAdmin})
+        return render(request, "points.html", {"account": account, "userPermission": userPermission, "loggedInUser": loggedInUser, "userIsSuperAdmin":userIsSuperAdmin, "qrCode": qrCode})
     else:
         return render(request, "error.html", {"error": "You do not have permissions to view this page!"})
     

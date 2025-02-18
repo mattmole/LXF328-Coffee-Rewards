@@ -3,7 +3,6 @@ from django.template.defaulttags import register
 
 @register.filter
 def get_range(value):
-    print(value)
     return range(value)
 
 @register.filter(name='addClass')
@@ -54,3 +53,23 @@ def userPermissions(userProfile=None, coffeeShop=None):
     superAdmin = False
     if userProfile != None and userProfile.user.is_superuser:
         return(True)
+    
+def generateQrCode(qrCodeText):
+    import segno
+    from io import BytesIO
+    from base64 import b64encode
+
+    qr = segno.make(qrCodeText, error='h')
+
+    buffer = BytesIO()
+    #qr.save(buffer,"svg")
+    img = qr.to_pil(scale=5)
+    img.save(buffer,"png")
+    #qr.to_artistic(
+    #    target=buffer,
+    #    scale=4,
+    #    kind='png'
+    #)
+    qrCode = 'data: image/png;base64, '+b64encode(buffer.getvalue()).decode('utf-8')
+    print(qrCode)
+    return qrCode
