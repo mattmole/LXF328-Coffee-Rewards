@@ -1,4 +1,4 @@
-from Rewards.models import Account, AccountOperation, AccountCodeBuilder, CoffeeShop, UserProfile
+from Rewards.models import Account, AccountOperation, AccountCodeBuilder, CoffeeShop, UserProfile, AuditEntries
 from django.template.defaulttags import register
 
 @register.filter
@@ -62,14 +62,8 @@ def generateQrCode(qrCodeText):
     qr = segno.make(qrCodeText, error='h')
 
     buffer = BytesIO()
-    #qr.save(buffer,"svg")
     img = qr.to_pil(scale=5)
     img.save(buffer,"png")
-    #qr.to_artistic(
-    #    target=buffer,
-    #    scale=4,
-    #    kind='png'
-    #)
+
     qrCode = 'data: image/png;base64, '+b64encode(buffer.getvalue()).decode('utf-8')
-    print(qrCode)
     return qrCode

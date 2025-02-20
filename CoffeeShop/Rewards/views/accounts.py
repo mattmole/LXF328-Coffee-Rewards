@@ -79,7 +79,7 @@ def listCoffeeShopAccounts(request, coffeeShopId):
     else:
         userPermission = None
 
-    availableAccounts = Account.objects.filter(coffeeShop__id = coffeeShopId)
+    availableAccounts = Account.objects.filter(coffeeShop__id = coffeeShopId).order_by("disabled")
 
     userIsSuperAdmin = hasSuperAdmin(loggedInUser)
 
@@ -91,7 +91,7 @@ def listCoffeeShopAccounts(request, coffeeShopId):
         if account.accountCode not in qrCodeDict:
             qrCodeDict[account.accountCode] = generateQrCode(account.accountCode)
 
-    return render(request, "coffeeShopAccounts.html", {"coffeeShopId": coffeeShopId, "availableAccounts": availableAccounts, "newAccountCode":newAccountCode, "userPermission": userPermission, "loggedInUser": loggedInUser, "userIsSuperAdmin":userIsSuperAdmin, "qrCodes": qrCodeDict})
+    return render(request, "coffeeShopAccounts.html", {"coffeeShopId": coffeeShopId, "coffeeShop":coffeeShop, "availableAccounts": availableAccounts, "newAccountCode":newAccountCode, "userPermission": userPermission, "loggedInUser": loggedInUser, "userIsSuperAdmin":userIsSuperAdmin, "qrCodes": qrCodeDict})
 
 
 def pointsEntry(request,accountId):
@@ -210,6 +210,7 @@ def createAccount(request,coffeeShopId):
 
     print(newAccountCode, initialPoints, initialRewards)
 
+    #newAccount = Account.objects.create(coffeeShop = CoffeeShop.objects.get(id = coffeeShopId), accountCode = newAccountCode)
     newAccount = Account()
     newAccount.coffeeShop = CoffeeShop.objects.get(id = coffeeShopId)
     newAccount.accountCode = newAccountCode
@@ -219,7 +220,7 @@ def createAccount(request,coffeeShopId):
     if initialRewards > 0 and initialRewards <= 5:
         newAccount.availableRewards = initialRewards
     try:
-        newAccount.save()
+        newAccount.save(url=request.path)
     except:
         print("Error")
     else:
@@ -249,7 +250,7 @@ def deleteAccount(request, accountId):
 
     if hasPermission:
         linkedCoffeeShop = CoffeeShop.objects.get(account = account)
-        account.delete()
+        account.delete(url=request.path)
         return render(request, "accountDeleted.html", {"message": f"Successfully deleted: {account.accountCode} and the corresponding history","redirectUrl": f"/rewards/coffeeShop/{linkedCoffeeShop.id}"})
     else:
         return render(request, "error.html", {"error": "You do not have permissions to view this page!"})

@@ -4,7 +4,28 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from Accounts.models import UserProfile
 
+def writeAuditEntry(auditType, auditMessage, modelName, operationName, url=""):
+    AuditEntries.objects.create(auditType = auditType, auditMessage=auditMessage, modelName=modelName, operationName=operationName, url=url)
+
 # Create your models here. 
+
+class AuditEntries(models.Model):
+    auditType = models.CharField(max_length=30, help_text="Type of audit", blank=True)
+    auditMessage = models.CharField(max_length=30, help_text="Message", blank=True)
+    modelName = models.CharField(max_length=30, help_text="Model", blank=True)
+    operationName = models.CharField(max_length=30, help_text="Operation Name", blank=True)
+    url = models.CharField(max_length=100, help_text="Call URL", blank=True)
+    dateTime = models.DateTimeField(help_text = "Timestamp of operation")
+    
+    def save(self, url="", *args, **kwargs):
+        ''' On save, update timestamps '''
+        self.dateTime = timezone.now()
+       
+        return super(AuditEntries, self).save(*args, **kwargs)
+    
+    class Meta:
+        verbose_name = "Audit Entries"
+        verbose_name_plural = "Audit Entries"
 
 class UserPermission(models.Model):
     permissionChoices = [
@@ -41,13 +62,25 @@ class Account(models.Model):
     lastModified = models.DateTimeField(verbose_name="Last Modified", editable=False)
     disabled = models.BooleanField(verbose_name="Account Disabled", default=False)
 
-    def save(self, *args, **kwargs):
+    def save(self, url="", *args, **kwargs):
         ''' On save, update timestamps '''
-        #if not self.id:
-        #    self.created = datetime.now()
         self.lastModified = timezone.now()
+
+        if not self.id:
+            writeAuditEntry("ObjectCreated", "Created instance of a model", "Account", self.accountCode, url)
+
+        writeAuditEntry("ObjectSaved", "Saved instance of a model", "Account", self.accountCode, url)
+       
         return super(Account, self).save(*args, **kwargs)
     
+    def delete(self, url="", *args, **kwargs):
+        parentSave = super(Account, self).delete(*args, **kwargs)
+        if parentSave:
+            writeAuditEntry("ObjectDeleted", "Deleted instance of a model", "Account", self.accountCode, url)
+
+        return parentSave
+
+
     def __str__(self):
         return f"{self.accountCode}"
 
