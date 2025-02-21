@@ -4,6 +4,7 @@ from rich import print
 import math
 import random
 from .helpers import *
+from django.contrib import messages
 
 from Rewards.models import Account, AccountOperation, AccountCodeBuilder, CoffeeShop, UserProfile
 
@@ -157,17 +158,20 @@ def pointsBalanceUpdate(request):
                 accountOperation.account = account
                 accountOperation.pointsChange=pointsToAdd
                 accountOperation.operation="PointsAdded"
-                accountOperation.save()
+                accountOperation.save(url=request.path, user=request.user.username, requestMethod=request.method)
+                messages.success(request, f"Points have been added: {pointsToAdd}")
 
                 if rewardsToAdd > 0:
                     accountOperation = AccountOperation()
                     accountOperation.account = account
                     accountOperation.pointsChange=rewardsToAdd
                     accountOperation.operation="RewardsAdded"
-                    accountOperation.save()
+                    accountOperation.save(url=request.path, user=request.user.username, requestMethod=request.method)
+                    messages.success(request, f"Rewards have been added: {rewardsToAdd}")
 
             else:
                 return render(request, "error.html", {"error": "You cannot add this many points!"})
+            
         # Remove the rewards
         if rewardsToUse > 0:
             if account.availableRewards >= rewardsToUse:
@@ -177,12 +181,14 @@ def pointsBalanceUpdate(request):
                 accountOperation.account = account
                 accountOperation.pointsChange=rewardsToUse
                 accountOperation.operation="RewardsUsed"
-                accountOperation.save()
+                accountOperation.save(url=request.path, user=request.user.username, requestMethod=request.method)
+                messages.success(request, f"Rewards have been used: {rewardsToUse}")
+
             else:
                 return render(request, "error.html", {"error": "You don't have enough rewards!"})
         
         if rewardsToUse > 0 or pointsToAdd > 0:   
-            account.save()
+            account.save(url=request.path, user=request.user.username, requestMethod=request.method)
             return render(request, "success.html", {"message": "Points have been added and / or rewards have been used!", "pointsAdded": pointsToAdd, "rewardsUsed": rewardsToUse, "redirectUrl": f"/rewards/coffeeShop/{linkedCoffeeShop.id}"})
     else:
         return render(request, "error.html", {"error": "You do not have permissions to view this page!"})
@@ -204,6 +210,7 @@ def timelineView(request, accountId):
         return render(request, "error.html", {"error": "You do not have permissions to view this page!"})
 
 def createAccount(request,coffeeShopId):
+    print(request.user)
     newAccountCode = request.POST.get('newAccountCode')
     initialPoints = int(request.POST.get('initialPoints'))
     initialRewards = int(request.POST.get('initialRewards'))
@@ -220,7 +227,7 @@ def createAccount(request,coffeeShopId):
     if initialRewards > 0 and initialRewards <= 5:
         newAccount.availableRewards = initialRewards
     try:
-        newAccount.save(url=request.path)
+        newAccount.save(url=request.path, user=request.user.username, requestMethod=request.method)
     except:
         print("Error")
     else:
@@ -229,13 +236,13 @@ def createAccount(request,coffeeShopId):
             pointsOperation.account = newAccount
             pointsOperation.pointsChange = initialPoints
             pointsOperation.operation = "InitialPoints"
-            pointsOperation.save()
+            pointsOperation.save(url=request.path, user=request.user.username, requestMethod=request.method)
         if initialRewards > 0:
             rewardsOperation = AccountOperation()
             rewardsOperation.account = newAccount
             rewardsOperation.pointsChange = initialRewards
             rewardsOperation.operation = "InitialRewards"
-            rewardsOperation.save()
+            rewardsOperation.save(url=request.path, user=request.user.username, requestMethod=request.method)
     finally:
         accounts = Account.objects.all()
         newAccountCode = genNewAccountCode()
@@ -250,7 +257,7 @@ def deleteAccount(request, accountId):
 
     if hasPermission:
         linkedCoffeeShop = CoffeeShop.objects.get(account = account)
-        account.delete(url=request.path)
+        account.delete(url=request.path, user=request.user, requestMethod=request.method)
         return render(request, "accountDeleted.html", {"message": f"Successfully deleted: {account.accountCode} and the corresponding history","redirectUrl": f"/rewards/coffeeShop/{linkedCoffeeShop.id}"})
     else:
         return render(request, "error.html", {"error": "You do not have permissions to view this page!"})

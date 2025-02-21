@@ -4,8 +4,8 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from Accounts.models import UserProfile
 
-def writeAuditEntry(auditType, auditMessage, modelName, operationName, url=""):
-    AuditEntries.objects.create(auditType = auditType, auditMessage=auditMessage, modelName=modelName, operationName=operationName, url=url)
+def writeAuditEntry(auditType, auditMessage, modelName, operationName, url="", user="", requestMethod=""):
+    AuditEntries.objects.create(auditType = auditType, auditMessage=auditMessage, modelName=modelName, operationName=operationName, url=url, user=user, requestMethod=requestMethod)
 
 # Create your models here. 
 
@@ -15,9 +15,13 @@ class AuditEntries(models.Model):
     modelName = models.CharField(max_length=30, help_text="Model", blank=True)
     operationName = models.CharField(max_length=30, help_text="Operation Name", blank=True)
     url = models.CharField(max_length=100, help_text="Call URL", blank=True)
+    user = models.CharField(max_length=100, help_text="User", blank=True)
+    requestMethod = models.CharField(max_length=30, help_text="Request Method", blank=True)
+    extraInfo = models.TextField(help_text="Extra information")
+
     dateTime = models.DateTimeField(help_text = "Timestamp of operation")
     
-    def save(self, url="", *args, **kwargs):
+    def save(self, *args, **kwargs):
         ''' On save, update timestamps '''
         self.dateTime = timezone.now()
        
@@ -50,6 +54,23 @@ class CoffeeShop(models.Model):
     def __str__(self):
         return f"{self.name} - {self.postcode}"
 
+    def save(self, url="", user="", requestMethod="", extraInfo="", *args, **kwargs):
+
+        if not self.id:
+            writeAuditEntry("ObjectCreated", "Created instance of a model", "CoffeeShop", f"{self.coffeeShop.id} - {self.coffeeShop.name}", url, user, requestMethod, extraInfo)
+
+        writeAuditEntry("ObjectSaved", "Saved instance of a model", "AccountOperation", f"{self.coffeeShop.id} - {self.coffeeShop.name}", url, user, requestMethod, extraInfo)
+       
+        return super(CoffeeShop, self).save(*args, **kwargs)
+    
+    def delete(self, url="", user="", requestMethod="", extraInfo="", *args, **kwargs):
+        parentSave = super(CoffeeShop, self).delete(*args, **kwargs)
+        if parentSave:
+            writeAuditEntry("ObjectDeleted", "Deleted instance of a model", "AccountOperation", f"{self.coffeeShop.id} - {self.coffeeShop.name}", url, user, requestMethod, extraInfo)
+
+        return parentSave
+
+
 
 class Account(models.Model):
     coffeeShop = models.ForeignKey(CoffeeShop, on_delete=models.CASCADE)
@@ -62,21 +83,21 @@ class Account(models.Model):
     lastModified = models.DateTimeField(verbose_name="Last Modified", editable=False)
     disabled = models.BooleanField(verbose_name="Account Disabled", default=False)
 
-    def save(self, url="", *args, **kwargs):
+    def save(self, url="", user="", requestMethod="", extraInfo="", *args, **kwargs):
         ''' On save, update timestamps '''
         self.lastModified = timezone.now()
 
         if not self.id:
-            writeAuditEntry("ObjectCreated", "Created instance of a model", "Account", self.accountCode, url)
+            writeAuditEntry("ObjectCreated", "Created instance of a model", "Account", self.accountCode, url, user, requestMethod, extraInfo)
 
-        writeAuditEntry("ObjectSaved", "Saved instance of a model", "Account", self.accountCode, url)
+        writeAuditEntry("ObjectSaved", "Saved instance of a model", "Account", self.accountCode, url, user, requestMethod)
        
         return super(Account, self).save(*args, **kwargs)
     
-    def delete(self, url="", *args, **kwargs):
+    def delete(self, url="", user="", requestMethod="", extraInfo="", *args, **kwargs):
         parentSave = super(Account, self).delete(*args, **kwargs)
         if parentSave:
-            writeAuditEntry("ObjectDeleted", "Deleted instance of a model", "Account", self.accountCode, url)
+            writeAuditEntry("ObjectDeleted", "Deleted instance of a model", "Account", self.accountCode, url, user, requestMethod, extraInfo)
 
         return parentSave
 
@@ -92,6 +113,22 @@ class AccountOperation(models.Model):
 
     def __str__(self):
         return f"{self.account} - {self.dateTimeOfOperation} - {self.operation} - {self.pointsChange}"
+
+    def save(self, url="", user="", requestMethod="", extraInfo="", *args, **kwargs):
+
+        if not self.id:
+            writeAuditEntry("ObjectCreated", "Created instance of a model", "AccountOperation", self.account.accountCode, url, user, requestMethod, extraInfo)
+
+        writeAuditEntry("ObjectSaved", "Saved instance of a model", "AccountOperation", self.account.accountCode, url, user, requestMethod, extraInfo)
+       
+        return super(AccountOperation, self).save(*args, **kwargs)
+    
+    def delete(self, url="", user="", requestMethod="", extraInfo="", *args, **kwargs):
+        parentSave = super(AccountOperation, self).delete(*args, **kwargs)
+        if parentSave:
+            writeAuditEntry("ObjectDeleted", "Deleted instance of a model", "AccountOperation", self.account.accountCode, url, user, requestMethod, extraInfo)
+
+        return parentSave
 
 class AccountCodeBuilder(models.Model):
     word = models.CharField(max_length=30, unique=True, help_text="Add a word")

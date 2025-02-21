@@ -46,6 +46,12 @@
             {% block header1 %}<h1>Coffee Shop Rewards</h1>{% endblock %}
         </div>
 
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+
         {% block mainBody %}Coffee Shop Rewards Content{% endblock %}
 
     </body>

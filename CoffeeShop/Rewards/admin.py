@@ -18,7 +18,7 @@ class UserPermissionAdmin(admin.ModelAdmin):
     list_display = ('user', 'permissions')
 
 class AuditEntriesAdmin(admin.ModelAdmin):
-    list_display = ('auditType', 'auditMessage', 'modelName', 'operationName', 'dateTime', 'url')
+    list_display = ('auditType', 'auditMessage', 'modelName', 'operationName', 'dateTime', 'user', 'requestMethod', 'url')
 
 admin.site.register(UserPermission,UserPermissionAdmin)
 admin.site.register(Account, AccountAdmin)
