@@ -67,3 +67,8 @@ def generateQrCode(qrCodeText):
 
     qrCode = 'data: image/png;base64, '+b64encode(buffer.getvalue()).decode('utf-8')
     return qrCode
+
+def convertDictToFormattedJson(inputDict):
+    from json import dumps
+    extraInfo = dumps(inputDict, sort_keys=True, indent=2, separators=(',', ': '))
+    return extraInfo

@@ -1,5 +1,5 @@
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from rich import print
 import math
 import random
@@ -139,6 +139,7 @@ def pointsBalanceUpdate(request):
     rewardsToUse = int(request.POST.get('useRewards'))
     accountId = request.POST.get('accountId')
     loggedInUser = request.user
+    auditEntryExtraInfo = {}
 
     account = Account.objects.get(accountCode = accountId)
     linkedCoffeeShop = CoffeeShop.objects.get(account = account)
@@ -158,7 +159,10 @@ def pointsBalanceUpdate(request):
                 accountOperation.account = account
                 accountOperation.pointsChange=pointsToAdd
                 accountOperation.operation="PointsAdded"
-                accountOperation.save(url=request.path, user=request.user.username, requestMethod=request.method)
+                extraInfoPointsAdded=convertDictToFormattedJson({"PointsAdded":pointsToAdd})
+                accountOperation.save(url=request.path, user=request.user.username, requestMethod=request.method, extraInfo=extraInfoPointsAdded)
+                auditEntryExtraInfo["PointsAdded"] = pointsToAdd
+                auditEntryExtraInfo["TotalPoints"] = account.totalPoints
                 messages.success(request, f"Points have been added: {pointsToAdd}")
 
                 if rewardsToAdd > 0:
@@ -166,7 +170,9 @@ def pointsBalanceUpdate(request):
                     accountOperation.account = account
                     accountOperation.pointsChange=rewardsToAdd
                     accountOperation.operation="RewardsAdded"
-                    accountOperation.save(url=request.path, user=request.user.username, requestMethod=request.method)
+                    extraInfoRewardsAdded=convertDictToFormattedJson({"RewardsAdded":rewardsToAdd})
+                    accountOperation.save(url=request.path, user=request.user.username, requestMethod=request.method, extraInfo=extraInfoRewardsAdded)
+                    auditEntryExtraInfo["RewardsAdded"] = rewardsToAdd
                     messages.success(request, f"Rewards have been added: {rewardsToAdd}")
 
             else:
@@ -181,15 +187,19 @@ def pointsBalanceUpdate(request):
                 accountOperation.account = account
                 accountOperation.pointsChange=rewardsToUse
                 accountOperation.operation="RewardsUsed"
-                accountOperation.save(url=request.path, user=request.user.username, requestMethod=request.method)
+                extraInfoRewardsToUser=convertDictToFormattedJson({"RewardsUsed":rewardsToUse})
+                accountOperation.save(url=request.path, user=request.user.username, requestMethod=request.method, extraInfo=extraInfoRewardsToUser)
+                auditEntryExtraInfo["RewardsUsed"] = rewardsToUse
                 messages.success(request, f"Rewards have been used: {rewardsToUse}")
 
             else:
                 return render(request, "error.html", {"error": "You don't have enough rewards!"})
         
         if rewardsToUse > 0 or pointsToAdd > 0:   
-            account.save(url=request.path, user=request.user.username, requestMethod=request.method)
-            return render(request, "success.html", {"message": "Points have been added and / or rewards have been used!", "pointsAdded": pointsToAdd, "rewardsUsed": rewardsToUse, "redirectUrl": f"/rewards/coffeeShop/{linkedCoffeeShop.id}"})
+            extraInfo = convertDictToFormattedJson(auditEntryExtraInfo)
+            account.save(url=request.path, user=request.user.username, requestMethod=request.method, extraInfo=extraInfo)
+            #return render(request, "success.html", {"message": "Points have been added and / or rewards have been used!", "pointsAdded": pointsToAdd, "rewardsUsed": rewardsToUse, "redirectUrl": f"/rewards/coffeeShop/{linkedCoffeeShop.id}"})
+            return redirect(f'/rewards/coffeeShop/{linkedCoffeeShop.id}')
     else:
         return render(request, "error.html", {"error": "You do not have permissions to view this page!"})
 
@@ -210,12 +220,10 @@ def timelineView(request, accountId):
         return render(request, "error.html", {"error": "You do not have permissions to view this page!"})
 
 def createAccount(request,coffeeShopId):
-    print(request.user)
+    auditEntryExtraInfo = {}
     newAccountCode = request.POST.get('newAccountCode')
     initialPoints = int(request.POST.get('initialPoints'))
     initialRewards = int(request.POST.get('initialRewards'))
-
-    print(newAccountCode, initialPoints, initialRewards)
 
     #newAccount = Account.objects.create(coffeeShop = CoffeeShop.objects.get(id = coffeeShopId), accountCode = newAccountCode)
     newAccount = Account()
@@ -224,31 +232,40 @@ def createAccount(request,coffeeShopId):
     if initialPoints > 0 and initialPoints <= 5:
         newAccount.currentPoints = initialPoints
         newAccount.totalPoints = initialPoints
+        auditEntryExtraInfo["InitialPoints"] = initialPoints
     if initialRewards > 0 and initialRewards <= 5:
         newAccount.availableRewards = initialRewards
+        auditEntryExtraInfo["InitialRewards"] = initialRewards
+
     try:
-        newAccount.save(url=request.path, user=request.user.username, requestMethod=request.method)
+        extraInfo = convertDictToFormattedJson(auditEntryExtraInfo)
+        newAccount.save(url=request.path, user=request.user.username, requestMethod=request.method, extraInfo=extraInfo)
     except:
-        print("Error")
+        return render(request, "error.html", {"error": "It was not possible to create this account"})
     else:
         if initialPoints > 0:
             pointsOperation = AccountOperation()
             pointsOperation.account = newAccount
             pointsOperation.pointsChange = initialPoints
             pointsOperation.operation = "InitialPoints"
-            pointsOperation.save(url=request.path, user=request.user.username, requestMethod=request.method)
+            extraInfoInitialPoints=convertDictToFormattedJson({"InitialPoints":initialPoints})
+            pointsOperation.save(url=request.path, user=request.user.username, requestMethod=request.method, extraInfo=extraInfoInitialPoints)
         if initialRewards > 0:
             rewardsOperation = AccountOperation()
             rewardsOperation.account = newAccount
             rewardsOperation.pointsChange = initialRewards
             rewardsOperation.operation = "InitialRewards"
-            rewardsOperation.save(url=request.path, user=request.user.username, requestMethod=request.method)
-    finally:
-        accounts = Account.objects.all()
-        newAccountCode = genNewAccountCode()
+            extraInfoInitialRewards=convertDictToFormattedJson({"InitialRewards":initialRewards})
+            rewardsOperation.save(url=request.path, user=request.user.username, requestMethod=request.method, extraInfo=extraInfoInitialRewards)
+        return redirect(f'/rewards/points/{newAccountCode}')
 
-        return render(request, "accounts.html", {"accounts": accounts, "newAccountCode":newAccountCode})
-    
+    #finally:
+        #accounts = Account.objects.all()
+        #newAccountCode = genNewAccountCode()
+
+        #return render(request, "accounts.html", {"accounts": accounts, "newAccountCode":newAccountCode})
+        return redirect(f'/rewards/points/newAccountCode')
+
 def deleteAccount(request, accountId):
 
     loggedInUser = request.user

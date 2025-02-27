@@ -4,8 +4,8 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 from Accounts.models import UserProfile
 
-def writeAuditEntry(auditType, auditMessage, modelName, operationName, url="", user="", requestMethod=""):
-    AuditEntries.objects.create(auditType = auditType, auditMessage=auditMessage, modelName=modelName, operationName=operationName, url=url, user=user, requestMethod=requestMethod)
+def writeAuditEntry(auditType, auditMessage, modelName, operationName, url="", user="", requestMethod="", extraInfo="\{\}"):
+    AuditEntries.objects.create(auditType = auditType, auditMessage=auditMessage, modelName=modelName, operationName=operationName, url=url, user=user, requestMethod=requestMethod, extraInfo=extraInfo)
 
 # Create your models here. 
 
@@ -17,7 +17,7 @@ class AuditEntries(models.Model):
     url = models.CharField(max_length=100, help_text="Call URL", blank=True)
     user = models.CharField(max_length=100, help_text="User", blank=True)
     requestMethod = models.CharField(max_length=30, help_text="Request Method", blank=True)
-    extraInfo = models.TextField(help_text="Extra information")
+    extraInfo = models.TextField(help_text="Extra information", blank=True)
 
     dateTime = models.DateTimeField(help_text = "Timestamp of operation")
     
@@ -59,7 +59,7 @@ class CoffeeShop(models.Model):
         if not self.id:
             writeAuditEntry("ObjectCreated", "Created instance of a model", "CoffeeShop", f"{self.coffeeShop.id} - {self.coffeeShop.name}", url, user, requestMethod, extraInfo)
 
-        writeAuditEntry("ObjectSaved", "Saved instance of a model", "AccountOperation", f"{self.coffeeShop.id} - {self.coffeeShop.name}", url, user, requestMethod, extraInfo)
+        writeAuditEntry("ObjectSaved", "Saved instance of a model", "AccountOperation", f"{self.id} - {self.name}", url, user, requestMethod, extraInfo)
        
         return super(CoffeeShop, self).save(*args, **kwargs)
     
@@ -90,7 +90,7 @@ class Account(models.Model):
         if not self.id:
             writeAuditEntry("ObjectCreated", "Created instance of a model", "Account", self.accountCode, url, user, requestMethod, extraInfo)
 
-        writeAuditEntry("ObjectSaved", "Saved instance of a model", "Account", self.accountCode, url, user, requestMethod)
+        writeAuditEntry("ObjectSaved", "Saved instance of a model", "Account", self.accountCode, url, user, requestMethod, extraInfo)
        
         return super(Account, self).save(*args, **kwargs)
     
@@ -107,7 +107,7 @@ class Account(models.Model):
 
 class AccountOperation(models.Model):
     account = models.ForeignKey(Account, on_delete=models.CASCADE)
-    dateTimeOfOperation = models.DateTimeField(verbose_name="Date / Time of Operation", default=datetime.now)
+    dateTimeOfOperation = models.DateTimeField(verbose_name="Date / Time of Operation", default=timezone.now)
     operation = models.CharField(max_length=30, verbose_name="Operation")
     pointsChange = models.BigIntegerField(verbose_name="Points Change", default=0)
 
